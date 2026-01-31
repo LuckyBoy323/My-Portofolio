@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nilai Raport Siswa</title>
+    <style>
+        /* Reset dan font */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #f0f0f0;
+            padding: 10px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* Container utama */
+        .container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            background-color: #1e1e1e;
+            padding: 10px 0;
+        }
+
+        /* Tabel styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 900px;
+        }
+        thead tr {
+            background-color: #2a7f62; /* hijau gelap */
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #222;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #1b1b1b;
+        }
+        th, td {
+            border: 1px solid #444;
+            text-align: center;
+            padding: 6px 8px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        /* Kolom No dan Mapel lebih lebar */
+        th:nth-child(1), td:nth-child(1) {
+            width: 30px;
+        }
+        th:nth-child(2), td:nth-child(2) {
+            text-align: left;
+            padding-left: 12px;
+            min-width: 120px;
+        }
+
+        /* Header smester dengan warna berbeda */
+        .semester-header {
+            background-color: #4a9a8f;
+        }
+
+        /* Baris khusus dengan warna hijau dan biru */
+        .totals {
+            background-color: #3a8b6e;
+            font-weight: 600;
+        }
+        .avg-row {
+            background-color: #336699;
+            font-weight: 600;
+            color: #e0eaff;
+        }
+
+        /* Input nilai */
+        input.score-input {
+            width: 50px;
+            background-color: #2e2e2e;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            text-align: center;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        input.score-input:focus {
+            outline: 2px solid #55c57a;
+            background-color: #3a3a3a;
+        }
+
+        /* Responsif untuk layar kecil */
+        @media screen and (max-width: 600px) {
+            table {
+                min-width: 700px;
+            }
+            input.score-input {
+                width: 40px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Nilai Raport Siswa</h1>
+
+<div class="container">
+    <table id="nilaiTable" aria-label="Tabel nilai raport siswa">
+        <thead>
+        <tr>
+            <th>No</th>
+            <th>Mapel</th>
+            <th class="semester-header">Semester 1</th>
+            <th class="semester-header">Semester 2</th>
+            <th class="semester-header">Semester 3</th>
+            <th class="semester-header">Semester 4</th>
+            <th class="semester-header">Semester 5</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Data mapel dan input nilai -->
+        <tr>
+            <td>1</td>
+            <td>Qurdis</td>
+            <td><input class="score-input" type="number" min="0" max="100" value="80"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="81"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="85"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="86"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="79"></td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Akidah</td>
+            <td><input class="score-input" type="number" min="0" max="100" value="80"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="87"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="92"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="93"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="87"></td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Fikih</td>
+            <td><input class="score-input" type="number" min="0" max="100" value="82"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="86"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="94"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="89"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="87"></td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Ski</td>
+            <td><input class="score-input" type="number" min="0" max="100" value="84"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="85"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="85"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="89"></td>
+            <td><input class="score-input" type="number" min="0" max="100" value="85"></td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr class="avg-row">
+            <td colspan="2">Rata-rata</td>
+            <td id="avgSem1">-</td>
+            <td id="avgSem2">-</td>
+            <td id="avgSem3">-</td>
+            <td id="avgSem4">-</td>
+            <td id="avgSem5">-</td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+<script>
+    // Fungsi hitung rata-rata per kolom
+    function calculateAverages() {
+        const table = document.getElementById('nilaiTable');
+        const tbodyRows = table.tBodies[0].rows;
+        const numRows = tbodyRows.length;
+        const numSemesters = 5;
+
+        // Array untuk jumlah nilai tiap semester
+        let totals = Array(numSemesters).fill(0);
+        let counts = Array(numSemesters).fill(0);
+
+        for (let row of tbodyRows) {
+            for (let i = 2; i < 2 + numSemesters; i++) {
+                const input = row.cells[i].querySelector('input');
+                const val = Number(input.value);
+                if (!isNaN(val) && val >= 0) {
+                    totals[i - 2] += val;
+                    counts[i - 2]++;
+                }
+            }
+        }
+
+        for (let i = 0; i < numSemesters; i++) {
+            const avgCell = document.getElementById(`avgSem${i+1}`);
+            if (counts[i] > 0) {
+                const avg = (totals[i] / counts[i]).toFixed(2);
+                avgCell.textContent = avg;
+            } else {
+                avgCell.textContent = '-';
+            }
+        }
+    }
+
+    // Event listener untuk input nilai
+    document.querySelectorAll('input.score-input').forEach(input => {
+        input.addEventListener('input', () => {
+            // Batasi nilai antara 0 - 100
+            if (input.value !== '') {
+                let val = Number(input.value);
+                if (val < 0) input.value = 0;
+                if (val > 100) input.value = 100;
+            }
+            calculateAverages();
+        });
+    });
+
+    // Hitung rata-rata saat pertama kali load
+    window.addEventListener('load', calculateAverages);
+</script>
+
+</body>
+</html>
