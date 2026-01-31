@@ -1,78 +1,392 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Nilai Raport Siswa</title>
-    <style>
-        /* Reset dan font */
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #f0f0f0;
-            padding: 10px;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rekap Nilai Raport | Tema ITS</title>
+<meta name="description" content="Rekap nilai raport siswa dengan tema ITS. Rata-rata otomatis, ekspor CSV, grafik, dan responsif. Siap untuk GitHub Pages.">
 
-        /* Container utama */
-        .container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255,255,255,0.1);
-            background-color: #1e1e1e;
-            padding: 10px 0;
-        }
+<style>
+  :root{
+    --its-deep:#002a55;
+    --its-blue:#00509e;
+    --its-accent:#0b8fe1;
+    --card:#071022;
+    --muted:#9fb3d6;
+    --glass: rgba(255,255,255,0.04);
+  }
 
-        /* Tabel styling */
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            min-width: 900px;
-        }
-        thead tr {
-            background-color: #2a7f62; /* hijau gelap */
-            color: #fff;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        tbody tr:nth-child(even) {
-            background-color: #222;
-        }
-        tbody tr:nth-child(odd) {
-            background-color: #1b1b1b;
-        }
-        th, td {
-            border: 1px solid #444;
-            text-align: center;
-            padding: 6px 8px;
-            font-size: 13px;
-            white-space: nowrap;
-        }
-        /* Kolom No dan Mapel lebih lebar */
-        th:nth-child(1), td:nth-child(1) {
-            width: 30px;
-        }
-        th:nth-child(2), td:nth-child(2) {
-            text-align: left;
-            padding-left: 12px;
-            min-width: 120px;
-        }
+  /* Basic reset */
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, "Segoe UI", Roboto, Arial; background:linear-gradient(180deg,#020617,#071022); color:#e6eef8;}
 
-        /* Header smester dengan warna berbeda */
-        .semester-header {
-            background-color: #4a9a8f;
-        }
+  /* Header */
+  header{
+    background: linear-gradient(90deg,var(--its-deep),var(--its-blue));
+    padding:20px;
+    text-align:center;
+    border-bottom:3px solid rgba(255,255,255,0.04);
+  }
+  header .title{font-size:20px;margin:0;font-weight:700;letter-spacing:0.2px;}
+  header .sub{margin:6px 0 0;color:var(--muted);font-size:13px;}
 
-        /* Baris khusus dengan warna hijau dan biru */
-        .totals {
-            background-color: #3a8b6e;
-            font-weight: 600;
-        }
+  /* Page layout */
+  .wrap{max-width:1200px;margin:18px auto;padding:12px;}
+  .controls{
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;
+  }
+  .controls .left{flex:1;display:flex;gap:8px;align-items:center}
+  .controls input[type="search"]{
+    background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:var(--muted);
+    min-width:200px;
+  }
+  .btn{
+    background:var(--its-accent);color:#01273a;border:none;padding:9px 12px;border-radius:10px;font-weight:700;cursor:pointer;
+    box-shadow:0 6px 18px rgba(11,143,225,0.12);
+  }
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
+
+  /* Card / table container */
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.04);
+    border-radius:12px;padding:12px;overflow:auto;
+    box-shadow:0 12px 30px rgba(2,6,23,0.6);
+  }
+
+  table{
+    width:100%;min-width:920px;border-collapse:collapse;font-size:13px;
+  }
+  thead th{
+    text-align:center;padding:12px 8px;background:linear-gradient(90deg,var(--its-deep),var(--its-blue));
+    color:#f8fbff;font-weight:700;border-bottom:2px solid rgba(255,255,255,0.04);
+  }
+  tbody td{padding:10px 8px;border-bottom:1px dashed rgba(255,255,255,0.02);vertical-align:middle;}
+  td.mapel{text-align:left;padding-left:14px;color:#dff0ff;font-weight:600}
+  td.small{width:72px}
+
+  /* Input styles */
+  input.score{
+    width:64px;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
+    background:#031028;color:var(--muted);text-align:center;font-weight:700;
+  }
+  input.score:focus{outline:2px solid rgba(11,143,225,0.18)}
+
+  /* Average cells */
+  tfoot td.avg{
+    background: linear-gradient(90deg,#08345a,#0b6fb0);
+    padding:12px;font-weight:800;color:#e8f6ff;text-align:center;
+  }
+  td.rowAvg{font-weight:700;color:#bfe6ff}
+
+  /* Chart area */
+  .chartWrap{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .chartBox{flex:1;min-width:260px;padding:12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+  .legend{font-size:13px;color:var(--muted);margin-top:8px}
+
+  /* Footer */
+  footer{text-align:center;padding:12px;color:var(--muted);font-size:13px;margin-top:16px}
+
+  /* Responsive */
+  @media (max-width:880px){
+    header .title{font-size:18px}
+    .controls input[type="search"]{min-width:120px}
+    td.mapel{font-size:13px}
+    input.score{width:52px}
+  }
+
+  /* Print friendly */
+  @media print{
+    body{background:white;color:black}
+    header, .controls, .btn{display:none}
+    .card{border:none;box-shadow:none}
+    table{min-width:0;font-size:11px}
+  }
+</style>
+</head>
+
+<body>
+<header>
+  <div class="title">Rekap Nilai Raport Siswa</div>
+  <div class="sub">Tema ITS | Interaktif, ekspor CSV, grafik, dan responsif</div>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <div class="left">
+      <input id="search" type="search" placeholder="Cari mapel, mis. Inggris" aria-label="Cari mapel">
+      <label style="color:var(--muted);font-size:13px">
+        <input id="hideEmpty" type="checkbox" style="margin-right:6px"> Sembunyikan baris kosong
+      </label>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button id="exportCsv" class="btn" title="Ekspor tabel ke CSV">Export CSV</button>
+      <button id="printBtn" class="btn ghost" title="Cetak halaman">Print</button>
+    </div>
+  </div>
+
+  <div class="card" role="region" aria-label="Tabel nilai raport">
+    <table id="nilaiTable" aria-describedby="tableDesc">
+      <caption id="tableDesc" style="display:none">Tabel nilai per semester. Ubah angka untuk memperbarui rata rata.</caption>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Mapel</th>
+          <th class="small">Sem 1</th>
+          <th class="small">Sem 2</th>
+          <th class="small">Sem 3</th>
+          <th class="small">Sem 4</th>
+          <th class="small">Sem 5</th>
+          <th class="small">Rata-rata</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <!-- Data default. Tambah atau ubah baris sesuai kebutuhan -->
+        <tr><td>1</td><td class="mapel">Qurdis</td> <td><input class="score" type="number" min="0" max="100" value="80"></td><td><input class="score" type="number" min="0" max="100" value="81"></td><td><input class="score" type="number" min="0" max="100" value="85"></td><td><input class="score" type="number" min="0" max="100" value="86"></td><td><input class="score" type="number" min="0" max="100" value="79"></td><td class="rowAvg">-</td></tr>
+
+        <tr><td>2</td><td class="mapel">Akidah</td> <td><input class="score" type="number" min="0" max="100" value="80"></td><td><input class="score" type="number" min="0" max="100" value="87"></td><td><input class="score" type="number" min="0" max="100" value="92"></td><td><input class="score" type="number" min="0" max="100" value="93"></td><td><input class="score" type="number" min="0" max="100" value="87"></td><td class="rowAvg">-</td></tr>
+
+        <tr><td>3</td><td class="mapel">Fikih</td> <td><input class="score" type="number" min="0" max="100" value="82"></td><td><input class="score" type="number" min="0" max="100" value="86"></td><td><input class="score" type="number" min="0" max="100" value="94"></td><td><input class="score" type="number" min="0" max="100" value="89"></td><td><input class="score" type="number" min="0" max="100" value="87"></td><td class="rowAvg">-</td></tr>
+
+        <tr><td>4</td><td class="mapel">SKI</td> <td><input class="score" type="number" min="0" max="100" value="84"></td><td><input class="score" type="number" min="0" max="100" value="85"></td><td><input class="score" type="number" min="0" max="100" value="85"></td><td><input class="score" type="number" min="0" max="100" value="89"></td><td><input class="score" type="number" min="0" max="100" value="85"></td><td class="rowAvg">-</td></tr>
+
+        <tr><td>5</td><td class="mapel">B. Arab</td> <td><input class="score" type="number" min="0" max="100" value="82"></td><td><input class="score" type="number" min="0" max="100" value="83"></td><td><input class="score" type="number" min="0" max="100" value="85"></td><td><input class="score" type="number" min="0" max="100" value="92"></td><td><input class="score" type="number" min="0" max="100" value="84"></td><td class="rowAvg">-</td></tr>
+
+        <tr><td>6</td><td class="mapel">PPC</td> <td><input class="score" type="number" min="0" max="100" value="87"></td><td><input class="score" type="number" min="0" max="100" value="85"></td><td><input class="score" type="number" min="0" max="100" value="86"></td><td><input class="score" type="number" min="0" max="100" value="89"></td><td><input class="score" type="number" min="0" max="100" value="90"></td><td class="rowAvg">-</td></tr>
+
+        <tr><td>7</td><td class="mapel">B. Indonesia</td> <td><input class="score" type="number" min="0" max="100" value="87"></td><td><input class="score" type="number" min="0" max="100" value="85"></td><td><input class="score" type="number" min="0" max="100" value="86"></td><td><input class="score" type="number" min="0" max="100" value="87"></td><td><input class="score" type="number" min="0" max="100" value="88"></td><td class="rowAvg">-</td></tr>
+
+        <tr><td>8</td><td class="mapel">Matematika</td> <td><input class="score" type="number" min="0" max="100" value="82"></td><td><input class="score" type="number" min="0" max="100" value="86"></td><td><input class="score" type="number" min="0" max="100" value="90"></td><td><input class="score" type="number" min="0" max="100" value="91"></td><td><input class="score" type="number" min="0" max="100" value="91"></td><td class="rowAvg">-</td></tr>
+
+        <tr><td>9</td><td class="mapel">B. Inggris</td> <td><input class="score" type="number" min="0" max="100" value="83"></td><td><input class="score" type="number" min="0" max="100" value="92"></td><td><input class="score" type="number" min="0" max="100" value="93"></td><td><input class="score" type="number" min="0" max="100" value="94"></td><td><input class="score" type="number" min="0" max="100" value="95"></td><td class="rowAvg">-</td></tr>
+
+        <!-- Tambah mapel lain sesuai kebutuhan -->
+      </tbody>
+
+      <tfoot>
+        <tr>
+          <td colspan="2" style="text-align:left;padding-left:12px">Rata-rata Semester</td>
+          <td class="avg" id="avg1">-</td>
+          <td class="avg" id="avg2">-</td>
+          <td class="avg" id="avg3">-</td>
+          <td class="avg" id="avg4">-</td>
+          <td class="avg" id="avg5">-</td>
+          <td class="avg" id="grand">-</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="chartWrap" aria-hidden="false">
+      <div class="chartBox">
+        <canvas id="miniChart" width="400" height="100" aria-label="Grafik rata rata semester"></canvas>
+        <div class="legend">Grafik rata rata per semester</div>
+      </div>
+
+      <div style="min-width:220px">
+        <div style="color:var(--muted);font-size:13px;margin-bottom:8px">Statistik</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;min-width:110px">
+            <div style="font-size:11px;color:var(--muted)">Mapel</div>
+            <div id="countSubjects" style="font-weight:800">0</div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;min-width:110px">
+            <div style="font-size:11px;color:var(--muted)">Rata rata keseluruhan</div>
+            <div id="overallAvg" style="font-weight:800">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Siap GitHub Pages. Untuk logo ITS tambahkan <code>&lt;img&gt;</code> di header.</footer>
+</div>
+
+<script>
+/* Helper: safe number from input */
+function safeNum(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/* Hitung rata rata per baris dan per semester */
+function recalc(){
+  const rows = Array.from(document.querySelectorAll("#nilaiTable tbody tr"));
+  const semesters = 5;
+  const totals = new Array(semesters).fill(0);
+  const counts = new Array(semesters).fill(0);
+
+  let subjectCount = 0;
+  let grandTotal = 0;
+  let grandCount = 0;
+
+  rows.forEach(row => {
+    const inputs = Array.from(row.querySelectorAll("input.score"));
+    let rowSum = 0;
+    let rowCount = 0;
+
+    inputs.forEach((inp, idx) => {
+      const val = safeNum(inp.value);
+      if (val !== null){
+        rowSum += val;
+        rowCount++;
+        totals[idx] += val;
+        counts[idx] ++;
+      }
+    });
+
+    // Update per-row average cell
+    const avgCell = row.querySelector("td.rowAvg");
+    if (rowCount){
+      const rAvg = (rowSum / rowCount);
+      avgCell.textContent = rAvg.toFixed(2);
+      subjectCount ++;
+      grandTotal += rowSum;
+      grandCount += rowCount;
+    } else {
+      avgCell.textContent = "-";
+    }
+  });
+
+  // Update semester averages and overall
+  for (let i=0;i<semesters;i++){
+    const el = document.getElementById("avg"+(i+1));
+    el.textContent = counts[i] ? (totals[i] / counts[i]).toFixed(2) : "-";
+  }
+
+  const overallEl = document.getElementById("overallAvg");
+  overallEl.textContent = grandCount ? (grandTotal / grandCount).toFixed(2) : "-";
+
+  document.getElementById("countSubjects").textContent = subjectCount;
+
+  // Calculate grand average across semester averages for display
+  const grandEl = document.getElementById("grand");
+  const semAverages = [];
+  for (let i=0;i<semesters;i++){
+    if (counts[i]) semAverages.push(totals[i]/counts[i]);
+  }
+  grandEl.textContent = semAverages.length ? (semAverages.reduce((a,b)=>a+b,0)/semAverages.length).toFixed(2) : "-";
+
+  drawChart(semAverages);
+}
+
+/* Simple canvas bar chart for semester averages */
+function drawChart(values){
+  const canvas = document.getElementById("miniChart");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  // If no data, show placeholder text
+  if (!values || !values.length){
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.font = "13px Inter, Arial";
+    ctx.fillText("Tidak ada data untuk grafik", 12, h/2 + 6);
+    return;
+  }
+
+  const padding = 12;
+  const barW = (w - padding*2) / values.length * 0.6;
+  const gap = ((w - padding*2) - (barW * values.length)) / (values.length - 1 || 1);
+  const maxVal = 100; // nilai maksimum
+  values.forEach((v,i) => {
+    const x = padding + i * (barW + gap);
+    const barH = (v / maxVal) * (h - padding*2);
+    const y = h - padding - barH;
+
+    // bar background
+    ctx.fillStyle = "rgba(255,255,255,0.04)";
+    ctx.fillRect(x, padding, barW, h - padding*2);
+
+    // bar
+    const grad = ctx.createLinearGradient(x, y, x, h - padding);
+    grad.addColorStop(0, "#a6d8ff");
+    grad.addColorStop(1, "#0b8fe1");
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, barW, barH);
+
+    // value label
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.font = "12px Inter, Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(v.toFixed(2), x + barW/2, y - 6);
+
+    // semester label
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.font = "11px Inter, Arial";
+    ctx.fillText("S"+(i+1), x + barW/2, h - 6);
+  });
+}
+
+/* Export table to CSV */
+function exportCSV(){
+  const rows = Array.from(document.querySelectorAll("#nilaiTable tr"));
+  const data = rows.map(row => {
+    const cols = Array.from(row.querySelectorAll("th,td"));
+    return cols.map(c => {
+      // For input, return value
+      const inp = c.querySelector && c.querySelector("input");
+      if (inp) return inp.value;
+      return c.textContent.trim();
+    }).join(",");
+  }).join("\n");
+
+  const blob = new Blob([data], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "rekap_nilai.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* Search and hide empty rows */
+function applyFilters(){
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const hideEmpty = document.getElementById("hideEmpty").checked;
+  const rows = document.querySelectorAll("#nilaiTable tbody tr");
+  rows.forEach(row => {
+    const name = row.querySelector("td.mapel").textContent.toLowerCase();
+    const inputs = Array.from(row.querySelectorAll("input.score"));
+    const anyValue = inputs.some(i => i.value !== "");
+    let show = true;
+    if (q && !name.includes(q)) show = false;
+    if (hideEmpty && !anyValue) show = false;
+    row.style.display = show ? "" : "none";
+  });
+}
+
+/* Init events */
+document.addEventListener("input", (e) => {
+  if (e.target && e.target.matches("input.score")){
+    // Clamp values
+    if (e.target.value !== ""){
+      if (Number(e.target.value) < 0) e.target.value = 0;
+      if (Number(e.target.value) > 100) e.target.value = 100;
+    }
+    recalc();
+  }
+});
+
+document.getElementById("search").addEventListener("input", applyFilters);
+document.getElementById("hideEmpty").addEventListener("change", applyFilters);
+
+document.getElementById("exportCsv").addEventListener("click", exportCSV);
+document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+/* Initial calculate and draw */
+window.addEventListener("load", () => {
+  recalc();
+  applyFilters();
+});
+</script>
+</body>
+</html>        }
         .avg-row {
             background-color: #336699;
             font-weight: 600;
